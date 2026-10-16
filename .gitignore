@@ -1,0 +1,6 @@
+places_v1.json
+data/places_v1.json
+.env
+*.key
+__pycache__/
+.DS_Store

@@ -126,6 +126,8 @@ h1 em{background:none;border:0;border-radius:0;padding:0 2px;transform:none;box-
 .ibtn.lab{border-radius:16px;grid-auto-flow:column;gap:6px;padding:0 16px;font-size:14px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--paper);border-radius:14px;padding:8px 16px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:20}
 #toast.on{opacity:1;transform:translate(-50%,0)}
+.tag-r{background:var(--yellow)}
+#mRv p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
 </style></head><body>
 <div id="app">
 <header><div><span class="eyebrow"><i class="line-dot" style="background:#B9DAA5"></i><i class="line-dot" style="background:#F6D27A"></i>從新北市中和區宜安路168巷出發</span><h1>今天<em>去哪玩</em>？</h1><div class="sub">射一鏢，讓飛鏢決定</div></div>
@@ -168,7 +170,7 @@ h1 em{background:none;border:0;border-radius:0;padding:0 2px;transform:none;box-
  <div class="m-rate" id="mRate"></div>
  <div class="m-tags" id="mTags"></div>
  <div class="m-addr" id="mAddr"></div>
- <section class="m-rv" aria-labelledby="rvH"><h3 id="rvH">評論摘要</h3><div id="mRv"></div><div class="m-attr" id="mAttr"></div></section>
+ <section class="m-rv" aria-labelledby="rvH"><h3 id="rvH">評論摘要</h3><div id="mRv"></div></section>
  <a class="go" id="mGo" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 44 C24 44 10 28 10 19 A14 14 0 0 1 38 19 C38 28 24 44 24 44 Z" fill="#F2A497" stroke="#3E3A39" stroke-width="3" stroke-linejoin="round"/><circle cx="24" cy="19" r="5" fill="#FFFCF6" stroke="#3E3A39" stroke-width="3"/></svg>帶我去（Google 地圖）</a>
  <div class="m-actions"><button type="button" class="ibtn lab" id="mOk" aria-label="重射"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5" fill="none" stroke="#3E3A39" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>重射</span></button><button type="button" class="ibtn lab" id="mShare" aria-label="分享"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="#A8D3E6" stroke="#3E3A39" stroke-width="2.4"/><circle cx="6" cy="12" r="3" fill="#F6D27A" stroke="#3E3A39" stroke-width="2.4"/><circle cx="18" cy="19" r="3" fill="#B9DAA5" stroke="#3E3A39" stroke-width="2.4"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4" stroke="#3E3A39" stroke-width="2.4"/></svg><span>分享</span></button></div>
 </div></div></div>
@@ -292,6 +294,7 @@ async function throwDart(){if(busy||!pool.length)return;busy=true;$("throw").dis
 $("throw").onclick=throwDart;$("bull").onclick=()=>{if(!busy)throwDart()};
 function resumeIdle(){D.style.opacity=0;B.freeze=false;B.spd=8;drawBoard()}
 const esc=t=>String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+function shortSum(t){t=t.replace(/\s+/g," ").trim();const ss=t.match(/[^。！？!?]+[。！？!?]?/g)||[t];let o="";for(const x of ss){if(o&&(o+x).length>70)break;o+=x;if(o.length>=50)break}return o.length>72?o.slice(0,70)+"…":o}
 const stars=r=>{const f=Math.round(r);return "★".repeat(f)+"<i>"+"★".repeat(5-f)+"</i>"};
 let cur=null,lastFocus=null;
 function show(p){cur=p;$("mIll").innerHTML=bigScene(p);$("rIll").innerHTML=ic(ICON[placeIcon(p)],"");
@@ -299,15 +302,14 @@ function show(p){cur=p;$("mIll").innerHTML=bigScene(p);$("rIll").innerHTML=ic(IC
  $("rName").textContent=p.name;$("rHint").textContent=p.addr+(p.reviews?`（${p.reviews} 則評論）`:"");$("rChips").innerHTML=chips;
  $("mLabel").innerHTML="🎯 正中紅心！・"+MODES[S.mode].label.replace(/<svg.*<\/svg>/,"");$("mName").textContent=p.name;
  $("mCounty").textContent=p.county;$("mDist").textContent=`${p.km.toFixed(1)} km・${tier(p.km)}`;
- $("mRate").innerHTML=p.rating?`<span class="st" aria-hidden="true">${stars(p.rating)}</span><b>${p.rating.toFixed(1)}</b><span class="foot">（${(p.reviews||0).toLocaleString()} 則 Google 評論）</span>`:`<span class="foot">暫無評分</span>`;
- $("mTags").innerHTML=`<span class="tag tag-t">${esc(p.cat)}</span><span class="tag tag-n">${p.night?"🏕️ 適合過夜":"☀️ 當天來回"}</span>`;
+ $("mRate").hidden=true;
+ $("mTags").innerHTML=(p.rating?`<span class="tag tag-r">★ ${p.rating.toFixed(1)}</span><span class="tag tag-d">${(p.reviews||0).toLocaleString()} 則評論</span>`:"")+`<span class="tag tag-t">${esc(p.cat)}</span><span class="tag tag-n">${p.night?"🏕️ 適合過夜":"☀️ 當天來回"}</span>`;
  $("mAddr").innerHTML=`<span aria-hidden="true">📍</span><span>${esc(p.addr)}</span>`;
- const rv=p.rv,G='<span class="gbrand">Google 地圖</span>';let h="",at="";
- if(rv&&rv.type=="gemini"){h=`<p>${esc(rv.text)}</p>`;at=`${esc(rv.disclosure||"摘要由 Gemini 生成")}・資料來源：${G}${rv.uri?`・<a href="${esc(rv.uri)}" target="_blank" rel="noopener">查看所有評論</a>`:""}`}
- else if(rv&&rv.type=="editorial"){h=`<p>${esc(rv.text)}</p>`;at=`簡介來源：${G}`}
- else if(rv&&rv.type=="reviews"){h=rv.quotes.map(q=>`<blockquote>「${esc(q.q)}」<cite>— ${q.au?`<a href="${esc(q.au)}" target="_blank" rel="noopener">${esc(q.a)}</a>`:esc(q.a)}${q.r?`・${"★".repeat(q.r)}`:""}${q.t?`・${esc(q.t)}`:""}</cite></blockquote>`).join("");at=`評論節錄自 ${G}`}
- else{h=`<p class="foot">暫無評論摘要</p>`}
- $("mRv").innerHTML=h;$("mAttr").innerHTML=at;$("mGo").href=p.url;
+ const rv=p.rv;let h;
+ if(rv&&(rv.type=="gemini"||rv.type=="editorial"))h=`<p>${esc(shortSum(rv.text))}</p>`;
+ else if(rv&&rv.type=="reviews")h=`<p>${esc(rv.quotes.slice(0,2).map(q=>"「"+q.q.replace(/[。！!～~…\s]+$/,"").slice(0,26)+(q.q.length>26?"…":"")+"」").join(" "))}</p>`;
+ else h=`<p class="foot">暫無評論摘要</p>`;
+ $("mRv").innerHTML=h;$("mGo").href=p.url;
  lastFocus=document.activeElement;$("reveal").hidden=false;$("mCard").querySelector(".m-body").scrollTop=0;$("mX").focus()}
 function closeM(re){$("reveal").hidden=true;resumeIdle();if(re)setTimeout(throwDart,250);else if(lastFocus)lastFocus.focus()}
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2200)}
